@@ -42,31 +42,32 @@ namespace ConsoleApplication1
                 };
                 sheets.Append(sheet);
 
-                var writer = OpenXmlWriter.Create(worksheetPart);
-
-                writer.WriteStartElement(new Worksheet());
-                writer.WriteStartElement(new SheetData());
-
-                writer.WriteStartElement(new Row());
-                writer.WriteElement(new Cell
+                using (var writer = OpenXmlWriter.Create(worksheetPart))
                 {
-                    CellValue = new CellValue(DateTime.Now.ToOADate().ToString(new NumberFormatInfo())),
-                    StyleIndex = 0
-                });
-                writer.WriteEndElement();
-
-
-                writer.WriteEndElement(); //end of SheetData
-                writer.WriteEndElement(); //end of worksheet
-
-                writer.Close();
-
+                    var b = new Builder(writer);
+                    b.StartEndElement(new Worksheet(),
+                        worksheet =>
+                        {
+                            b.StartEndElement(new SheetData(),
+                                sheetData =>
+                                {
+                                    b.StartEndElement(new Row(), row =>
+                                    {
+                                        b.Element(new Cell
+                                        {
+                                            CellValue =
+                                                new CellValue(DateTime.Now.ToOADate().ToString(new NumberFormatInfo())),
+                                            StyleIndex = 0
+                                        });
+                                    });
+                                });
+                        });
+                }
                 // Close the document.
                 workbookPart.Workbook.Save();
                 spreadsheet.Close();
             }
         }
-
 
         [SuppressMessage("ReSharper", "PossiblyMistakenUseOfParamsMethod")]
         private static Stylesheet CreateStylesheet()
@@ -104,11 +105,10 @@ namespace ConsoleApplication1
             {
                 BorderId = 0,
                 FontId = 0,
-                FillId = 0,
-                
+                FillId = 0
             }, new CellStyleFormats()));
 
-            stylesheet.Append(AddInComposit(new CellFormat()
+            stylesheet.Append(AddInComposit(new CellFormat
             {
                 NumberFormatId = numberingFormat.NumberFormatId,
                 ApplyNumberFormat = true,
@@ -123,6 +123,34 @@ namespace ConsoleApplication1
             }, new CellStyles()));
 
             return stylesheet;
+        }
+
+        public class Builder
+        {
+            public Builder(OpenXmlWriter writer)
+            {
+                Writer = writer;
+            }
+
+            public OpenXmlWriter Writer { get; private set; }
+
+            public void StartEndElement(OpenXmlElement element, Action<OpenXmlElement> action)
+            {
+                Writer.WriteStartElement(element);
+                action(element);
+                Writer.WriteEndElement();
+            }
+
+            public void Element(OpenXmlElement element, Action<OpenXmlElement> action)
+            {
+                action(element);
+                Writer.WriteElement(element);
+            }
+
+            public void Element(OpenXmlElement element)
+            {
+                Element(element, e => { });
+            }
         }
 
         private static OpenXmlCompositeElement AddInComposit(OpenXmlElement element,
