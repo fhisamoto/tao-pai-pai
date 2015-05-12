@@ -17,11 +17,11 @@ namespace ConsoleApplication1
             {
                 File.Delete(sFile);
             }
-            Lala(sFile);
+            WriteXlsx(sFile);
         }
 
         [SuppressMessage("ReSharper", "PossiblyMistakenUseOfParamsMethod")]
-        private static void Lala(string docName)
+        private static void WriteXlsx(string docName)
         {
             using (var spreadsheet = SpreadsheetDocument.Create(docName, SpreadsheetDocumentType.Workbook))
             {
