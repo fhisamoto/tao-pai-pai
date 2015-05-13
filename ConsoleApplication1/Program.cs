@@ -57,7 +57,13 @@ namespace ConsoleApplication1
                                         {
                                             CellValue =
                                                 new CellValue(DateTime.Now.ToOADate().ToString(new NumberFormatInfo())),
-                                            StyleIndex = 0
+                                            StyleIndex = 1
+                                        });
+                                        b.Element(new Cell
+                                        {
+                                            CellValue = new CellValue("lalala"),
+                                            DataType = CellValues.String,
+                                            StyleIndex = 2
                                         });
                                     });
                                 });
@@ -81,16 +87,30 @@ namespace ConsoleApplication1
             };
             stylesheet.Append(AddInComposit(numberingFormat, new NumberingFormats()));
 
-            stylesheet.Append(AddInComposit(new Font
+            var fonts = new Fonts();
+            AddInComposit(new Font
             {
                 FontName = new FontName {Val = "Calibri"},
-                FontSize = new FontSize {Val = 11}
-            }, new Fonts()));
-
-            stylesheet.Append(AddInComposit(new Fill
+                FontSize = new FontSize {Val = 11},
+                Color = new Color {Indexed = 8},
+                FontFamilyNumbering = new FontFamilyNumbering {Val = 2},
+                FontScheme = new FontScheme {Val = FontSchemeValues.Minor}
+            }, fonts);
+            AddInComposit(new Font
             {
-                PatternFill = new PatternFill {PatternType = PatternValues.None}
-            }, new Fills()));
+                Bold = new Bold(),
+                FontSize = new FontSize {Val = 11},
+                FontName = new FontName {Val = "Calibri"}
+            }, fonts);
+            stylesheet.Append(fonts);
+
+            var fills = new Fills();
+            AddInComposit(new Fill(), fills);
+            AddInComposit(new Fill
+            {
+                PatternFill = new PatternFill {PatternType = PatternValues.DarkGray}
+            }, fills);
+            stylesheet.Append(fills);
 
             stylesheet.Append(AddInComposit(new Border
             {
@@ -103,24 +123,51 @@ namespace ConsoleApplication1
 
             stylesheet.Append(AddInComposit(new CellFormat
             {
+                ApplyAlignment = new BooleanValue(false),
+                ApplyFill = new BooleanValue(false),
+                ApplyNumberFormat = new BooleanValue(false),
+                ApplyProtection = new BooleanValue(false),
                 BorderId = 0,
                 FontId = 0,
                 FillId = 0
             }, new CellStyleFormats()));
 
-            stylesheet.Append(AddInComposit(new CellFormat
+            var cellFormats = new CellFormats();
+            AddInComposit(new CellFormat
             {
-                NumberFormatId = numberingFormat.NumberFormatId,
-                ApplyNumberFormat = true,
-                FormatId = 0
-            }, new CellFormats()));
-
-            stylesheet.Append(AddInComposit(new CellStyle
+                ApplyAlignment = new BooleanValue(false),
+                ApplyFill = new BooleanValue(false),
+                ApplyNumberFormat = new BooleanValue(false),
+                ApplyProtection = new BooleanValue(false),
+                BorderId = 0,
+                FillId = 0,
+                FontId = 0,
+                NumberFormatId = 0
+            }, cellFormats);
+            AddInComposit(new CellFormat()
             {
-                FormatId = 0,
-                Name = "Normal",
-                BuiltinId = 0
-            }, new CellStyles()));
+                ApplyAlignment = new BooleanValue(false),
+                ApplyFill = new BooleanValue(false),
+                ApplyNumberFormat = new BooleanValue(true),
+                ApplyProtection = new BooleanValue(false),
+                BorderId = 0,
+                FillId = 0,
+                FontId = 0,
+                NumberFormatId = 165
+            }, cellFormats);
+            AddInComposit(new CellFormat()
+            {
+                ApplyAlignment = new BooleanValue(false),
+                ApplyFill = new BooleanValue(false),
+                ApplyFont = new BooleanValue(true),
+                ApplyNumberFormat = new BooleanValue(false),
+                ApplyProtection = new BooleanValue(false),
+                BorderId = 0,
+                FillId = 0,
+                FontId = 1,
+                NumberFormatId = 0
+            }, cellFormats);
+            stylesheet.Append(cellFormats);
 
             return stylesheet;
         }
